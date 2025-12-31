@@ -8,7 +8,7 @@ import requests
 import json
 
 headers = {
-    "Authorization": "Bearer 7f4c8e79-3a7c-4723-aaf4-9ff337659411",
+    "Authorization": "Bearer BRIGHT_DATA_SECRET_KEY",
     "Content-Type": "application/json",
 }
 
