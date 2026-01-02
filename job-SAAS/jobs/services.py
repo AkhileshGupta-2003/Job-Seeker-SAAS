@@ -53,7 +53,7 @@ def search_jobs_on_linkedin(location :str,
 
 
 
-@tool('search_jobs_on_glassdoor', description = 'Search jobs on Glassdoor for job listings using parameters (location , keyword, country) based on user input. This function returns all the job listings found on glassdoor.')
+@tool('search_jobs_on_glassdoor', description = 'Search jobs on Glassdoor for job listings using parameters (location , keyword, country) based on user input. This function returns all the job listings found on glassdoor.when providing the country code always provide the code (e.g. FR, AT, IT and so on)')
 def search_jobs_on_glassdoor(location :str,
                             keyword: str,
                             country : str,
