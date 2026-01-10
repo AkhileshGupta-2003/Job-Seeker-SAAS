@@ -3,7 +3,7 @@ import json
 import requests
 from langchain.agents import create_agent
 from langchain.tools import tool
-
+from .models import SnapShot
 
 
 
@@ -12,7 +12,9 @@ from langchain.tools import tool
 
 
 @tool('search_jobs_on_linkedin', description = 'Search jobs on linkedin for job listings using parameters (location , keyword, country,job_type, experience_level, on_site, comapny, location_radius) based on user input. This functions returns all job listings found on linkedin ')
-def search_jobs_on_linkedin(location :str,
+def search_jobs_on_linkedin(
+                            llm_result_id : int,
+                            location :str,
                             keyword: str,
                             country : str,
                             job_type: str,
@@ -41,6 +43,14 @@ def search_jobs_on_linkedin(location :str,
     response = requests.post(url,headers = headers, data = data)
     response.raise_for_status()
     snapshot_id = response.json()['snapshot_id']
+    snapshot = SnapShot(
+        snapshot_id = snapshot_id,
+        ready = False,
+        llm_result_id = llm_result_id,
+        data ={})
+    snapshot.save()
+    return "Succesfully Created Snapshot."
+    '''
     url = f'https://api.brightdata.com/datasets/V3/trigger/{snapshot_id}'
     while requests.get(url, headers = headers).json()['status'] != 'ready':
         time.sleep(5)
@@ -48,13 +58,14 @@ def search_jobs_on_linkedin(location :str,
     response = requests.get(url,headers=headers)
     response.raise_for_status()
     return response.json()
-
+    '''
 
 
 
 
 @tool('search_jobs_on_glassdoor', description = 'Search jobs on Glassdoor for job listings using parameters (location , keyword, country) based on user input. This function returns all the job listings found on glassdoor.when providing the country code always provide the code (e.g. FR, AT, IT and so on)')
-def search_jobs_on_glassdoor(location :str,
+def search_jobs_on_glassdoor(llm_result_id : int,
+                            location :str,
                             keyword: str,
                             country : str,
                             time_range: str = 'past_month'):
@@ -71,13 +82,22 @@ def search_jobs_on_glassdoor(location :str,
     response = requests.post(url,headers = headers, data = data)
     response.raise_for_status()
     snapshot_id = response.json()['snapshot_id']
+    Snapshot = SnapShot(
+        snapshot_id = snapshot_id,
+        ready = False,
+        llm_result_id = llm_result_id,
+        data = {}
+    )
+    Snapshot.save()
+    return "Succesfully Created Snapshot"
+    '''
     url = f'https://api.brightdata.com/datasets/V3/trigger/{snapshot_id}'
     while requests.get(url, headers = headers).json()['status'] != 'ready':
         time.sleep(5)
     url = f'https://api.brightdata.com/datasets/V3/trigger/{snapshot_id}?format=json'
     response = requests.get(url,headers=headers)
     response.raise_for_status()
-    return response.json()
+    return response.json()'''
 
 def search_jobs_agent(prompt : str) -> str: 
     agent = create_agent(
