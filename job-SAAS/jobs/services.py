@@ -3,7 +3,7 @@ import json
 import requests
 from langchain.agents import create_agent
 from langchain.tools import tool
-from .models import SnapShot
+from .models import SnapShot, LLMResult\
 
 
 
@@ -51,13 +51,8 @@ def search_jobs_on_linkedin(
     snapshot.save()
     return "Succesfully Created Snapshot."
     '''
-    url = f'https://api.brightdata.com/datasets/V3/trigger/{snapshot_id}'
-    while requests.get(url, headers = headers).json()['status'] != 'ready':
-        time.sleep(5)
-    url = f'https://api.brightdata.com/datasets/V3/trigger/{snapshot_id}?format=json'
-    response = requests.get(url,headers=headers)
-    response.raise_for_status()
-    return response.json()
+   
+   
     '''
 
 
@@ -90,16 +85,16 @@ def search_jobs_on_glassdoor(llm_result_id : int,
     )
     Snapshot.save()
     return "Succesfully Created Snapshot"
-    '''
-    url = f'https://api.brightdata.com/datasets/V3/trigger/{snapshot_id}'
-    while requests.get(url, headers = headers).json()['status'] != 'ready':
-        time.sleep(5)
-    url = f'https://api.brightdata.com/datasets/V3/trigger/{snapshot_id}?format=json'
-    response = requests.get(url,headers=headers)
-    response.raise_for_status()
-    return response.json()'''
 
-def search_jobs_agent(prompt : str) -> str: 
+@tool('set_results_title', description = 'Set the title of the llmresult in the database for asynchronous processing')
+def set_results_title(llm_result_id : int, title : str)-> str:
+    llm_results = LLMResult.objects.get(id = llm_result_id)
+    llm_results.title = title
+    llm_results.save()
+    return 'Succes'
+
+
+def search_jobs_agent(llm_result_id : int,prompt : str) -> str: 
     agent = create_agent(
         model = 'gpt-4.1-mini',
         tools = [search_jobs_on_linkedin, search_jobs_on_glassdoor]
@@ -107,6 +102,27 @@ def search_jobs_agent(prompt : str) -> str:
     response = agent.invoke(
         {'messages':
             [{'role' : 'system' , 'content':' You are a helpful assistant that helps users search for job listings on linkedin and glassdoor based on their preferences'},
-             {'role' : 'user', 'content' : prompt}]}
+            {'role' : 'user', 'content' : f'The id of the llm result is {llm_result_id}.Always use the tool for setting the title of the given result id first. Always pass the result id when calling tools.User request : {prompt}'}]}
     )
     return response['messages'][-1].content
+
+def is_ready(snapshot_id :str) -> bool:
+    url = f'https://api.brightdata.com/datasets/V3/trigger/{snapshot_id}'
+    headers = {
+    "Authorization": "Bearer BRIGHT_DATA_SECRET_KEY",
+    "Content-Type": "application/json"}
+
+    return requests.get(url, headers = headers).json()['status'] == 'ready'
+
+
+
+def get_data(snapshot_id:str)-> dict:
+    url =  f'https://api.brightdata.com/datasets/V3/trigger/{snapshot_id}'
+    headers = {
+    "Authorization": "Bearer BRIGHT_DATA_SECRET_KEY",
+    "Content-Type": "application/json"}
+    response = requests.get(url,headers=headers)
+
+    response.raise_for_status()
+    
+    return response.json()

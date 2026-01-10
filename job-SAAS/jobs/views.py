@@ -17,7 +17,10 @@ def search_job_view(request):
                     status= 'pending',
                     owner = request.user
                 )
-            except:
-                pass 
-    else:
-        pass
+                llm_result.save()
+                result = search_jobs_agent(llm_result.id, prompt)
+                context['result'] = result
+                context['prompt'] = prompt
+            except Exception as e:
+                context['error'] = str(e)
+    return render(request, 'search.html', context)
