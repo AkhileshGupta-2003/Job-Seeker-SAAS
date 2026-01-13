@@ -3,7 +3,7 @@ import json
 import requests
 from langchain.agents import create_agent
 from langchain.tools import tool
-from .models import SnapShot, LLMResult\
+from .models import SnapShot, LLMResult
 
 
 
@@ -50,11 +50,7 @@ def search_jobs_on_linkedin(
         data ={})
     snapshot.save()
     return "Succesfully Created Snapshot."
-    '''
-   
-   
-    '''
-
+    
 
 
 
